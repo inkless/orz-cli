@@ -1,17 +1,24 @@
 // Node.js core modules
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { execSync } from 'node:child_process';
 
 // External packages
 import { Command } from 'commander';
-import { confirm } from '@inquirer/prompts';
 
 // Internal imports
-import { checkGitHubCli } from '../utils/commands.js';
-import { projectRoot } from '../utils/paths.js';
-import { createJiraTicket } from '../utils/jira/createTicket.js';
-import { getJiraConfig } from '../utils/jira/setup.js';
+import { checkGitHubCli } from '../libs/commands.js';
+import { createJiraTicket } from '../libs/jira/createTicket.js';
+import { getJiraConfig } from '../libs/jira/setup.js';
+import {
+  showDiffWithMainBranch,
+  getCurrentBranch,
+  pushBranchToRemote,
+  getFirstCommitMessage,
+} from '../libs/git.js';
+import {
+  confirmPrCreation,
+  confirmPrTitle,
+  createPullRequest,
+} from '../libs/github.js';
+import { confirmJiraTicketCreation } from '../libs/jira/prompts.js';
 
 const ghPullRequestCommand = new Command('gh-pull-request')
   .description('Create a GitHub pull request with current branch changes')
@@ -20,73 +27,35 @@ const ghPullRequestCommand = new Command('gh-pull-request')
   .option('--jira-type <jiraType>', 'Jira issue type')
   .action(async (options) => {
     try {
-      const jiraConfig = getJiraConfig();
-
       // Check if GitHub CLI is installed
       if (!checkGitHubCli()) {
         process.exit(1);
       }
 
+      const jiraConfig = getJiraConfig();
+
       // Show git diff with main branch
-      console.log('📊 Showing diff with main branch:');
-      console.log('-------------------------------');
-      execSync('git diff main --stat', { stdio: 'inherit' });
-      console.log('-------------------------------');
+      showDiffWithMainBranch();
 
-      // Prompt user to confirm using Inquirer
-      const shouldContinue = await confirm({
-        message: 'Continue with creating PR?',
-        default: true,
-      });
-
-      if (!shouldContinue) {
-        console.log('❌ PR creation cancelled');
-        process.exit(0);
-      }
+      // Prompt user to confirm
+      await confirmPrCreation();
 
       // Get current branch name
-      const currentBranch = execSync('git branch --show-current')
-        .toString()
-        .trim();
+      const currentBranch = getCurrentBranch();
 
-      // Push to remote
-      // check if current branch is already pushed to remote
-      const remoteRef = execSync(
-        `git ls-remote --heads origin ${currentBranch}`,
-      )
-        .toString()
-        .trim();
+      // Push to remote if needed
+      pushBranchToRemote(currentBranch);
 
-      if (!remoteRef) {
-        console.log(`🚀 Pushing branch ${currentBranch} to remote...`);
-        try {
-          execSync(`git push -u origin ${currentBranch}`, { stdio: 'inherit' });
-        } catch (error) {
-          console.error('Error pushing to remote:', error);
-          process.exit(1);
-        }
-      }
-
-      // Read first commit message after main
-      console.log('📝 Extracting commit message for PR title...');
-      let commitMessage = execSync(
-        `git log main..${currentBranch} --format=%s --reverse | head -1`,
-      )
-        .toString()
-        .trim();
+      // Get commit message for PR title
+      let commitMessage = getFirstCommitMessage(currentBranch);
 
       // Create pull request using gh CLI
-      let prCommand = 'gh pr create';
-
       let jiraUrl = '';
 
       // Create Jira ticket if requested
       if (options.jira) {
         // confirm if user want to create a Jira ticket
-        const shouldCreateJira = await confirm({
-          message: 'Create a Jira ticket for this PR?',
-          default: true,
-        });
+        const shouldCreateJira = await confirmJiraTicketCreation();
 
         if (shouldCreateJira) {
           const jiraTicket = await createJiraTicket({
@@ -103,27 +72,13 @@ const ghPullRequestCommand = new Command('gh-pull-request')
       }
 
       // Confirm if user wants to use this title
-      const useTitle = await confirm({
-        message: `Do you want to use "${commitMessage}" as the PR title?`,
-        default: true,
-      });
+      const useTitle = await confirmPrTitle(commitMessage);
 
       if (useTitle) {
-        prCommand += ` --title "${commitMessage}"`;
+        createPullRequest(commitMessage);
+      } else {
+        createPullRequest('');
       }
-
-      // Add template if it exists
-      const templatePath = join(
-        projectRoot,
-        '.github',
-        'pull_request_template.md',
-      );
-      if (existsSync(templatePath)) {
-        prCommand += ' --template "pull_request_template.md"';
-      }
-
-      console.log('🔗 Creating GitHub pull request...');
-      execSync(prCommand, { stdio: 'inherit' });
 
       console.log('✅ Pull request created successfully!');
       if (jiraUrl) {

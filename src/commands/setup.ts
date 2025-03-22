@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { getDataDir } from '../utils/paths.js';
-import { setupJira } from '../utils/jira/setup.js';
-import { checkGitHubCli } from '../utils/commands.js';
+import { getDataDir } from '../libs/paths.js';
+import { setupJira } from '../libs/jira/setup.js';
+import { checkGitHubCli } from '../libs/commands.js';
 
 const setupCommand = new Command('setup')
   .description('Setup the CLI tool and configure required settings')

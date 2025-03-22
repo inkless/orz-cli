@@ -3,8 +3,8 @@ import { Command } from 'commander';
 import { input } from '@inquirer/prompts';
 
 // Internal imports
-import { createJiraTicket } from '../utils/jira/createTicket.js';
-import { getJiraConfig } from '../utils/jira/setup.js';
+import { createJiraTicket } from '../libs/jira/createTicket.js';
+import { getJiraConfig } from '../libs/jira/setup.js';
 
 const createJiraTicketCommand = new Command('create-jira-ticket')
   .description('Create a Jira ticket with the specified details')
