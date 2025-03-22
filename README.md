@@ -59,8 +59,13 @@ The `jira_config.json` file stores your Jira configuration and is created automa
   "url": "https://your-domain.atlassian.net",
   "defaultProjectKey": "PROJ",
   "supportedIssueTypes": ["Story", "Task", "Sub-task"],
-  "parentEpicChoices": [{ "name": "My Epic", "value": "PROJ-2" }],
-  "parentStoryChoices": [{ "name": "My Task", "value": "PROJ-3" }]
+  "parentEpicChoices": [
+    { "name": "My Epic", "value": "PROJ-2" },
+    { "name": "My Epic 2", "value": "PROJ-3" }
+  ],
+  "parentStoryChoices": [{ "name": "My Task", "value": "PROJ-3" }],
+  "accountId": "your-account-id",
+  "autoAssign": true
 }
 ```
 
@@ -85,14 +90,6 @@ orz-cli create-jira-ticket
 ```
 
 ## Available Commands
-
-### `hello [name]`
-
-A simple greeting command (example/test command).
-
-Options:
-
-- `-u, --uppercase` - Output the greeting in uppercase
 
 ### `setup`
 
