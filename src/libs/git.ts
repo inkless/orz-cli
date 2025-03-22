@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { getJiraConfig } from './jira/setup.js';
+import { getJiraConfig } from './jira/config.js';
 
 /**
  * Gets main branch name from config

@@ -1,7 +1,7 @@
 // Internal imports
 import { input } from '@inquirer/prompts';
 import { JiraClient, JiraIssueType } from './client.js';
-import { getJiraConfig } from './setup.js';
+import { getJiraConfig } from './config.js';
 
 /**
  * Parameters for creating a Jira ticket

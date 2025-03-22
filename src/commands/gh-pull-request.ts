@@ -6,7 +6,7 @@ import { Command } from 'commander';
 // Internal imports
 import { checkGitHubCli } from '../libs/commands.js';
 import { createJiraTicket } from '../libs/jira/createTicket.js';
-import { getJiraConfig } from '../libs/jira/setup.js';
+import { getJiraConfig } from '../libs/jira/config.js';
 import {
   showDiffWithMainBranch,
   getCurrentBranch,

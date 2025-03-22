@@ -2,7 +2,7 @@
 import { Buffer } from 'node:buffer';
 
 // Internal imports
-import { getJiraConfig, getJiraApiToken } from './setup.js';
+import { getJiraConfig, getJiraApiToken } from './config.js';
 import { request } from '../request.js';
 
 /**
