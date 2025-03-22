@@ -22,7 +22,7 @@ import { confirmJiraTicketCreation } from '../libs/jira/prompts.js';
 
 const ghPullRequestCommand = new Command('gh-pull-request')
   .description('Create a GitHub pull request with current branch changes')
-  .option('-j, --jira', 'Create a Jira ticket for this PR', true)
+  .option('-j, --jira', 'Create a Jira ticket for this PR')
   .option('--jira-project <jiraProject>', 'Jira project key')
   .option('--jira-type <jiraType>', 'Jira issue type')
   .action(async (options) => {
@@ -52,22 +52,21 @@ const ghPullRequestCommand = new Command('gh-pull-request')
       // Create pull request using gh CLI
       let jiraUrl = '';
 
+      // confirm if user want to create a Jira ticket
+      const shouldCreateJira =
+        options.jira || (await confirmJiraTicketCreation());
+
       // Create Jira ticket if requested
-      if (options.jira) {
-        // confirm if user want to create a Jira ticket
-        const shouldCreateJira = await confirmJiraTicketCreation();
+      if (shouldCreateJira) {
+        const jiraTicket = await createJiraTicket({
+          summary: commitMessage,
+          projectKey: options.jiraProject || jiraConfig.defaultProjectKey,
+          issueType: options.jiraType,
+        });
 
-        if (shouldCreateJira) {
-          const jiraTicket = await createJiraTicket({
-            summary: commitMessage,
-            projectKey: options.jiraProject || jiraConfig.defaultProjectKey,
-            issueType: options.jiraType,
-          });
-
-          if (jiraTicket) {
-            commitMessage = `${commitMessage} [${jiraTicket.key}]`;
-            jiraUrl = jiraTicket.url;
-          }
+        if (jiraTicket) {
+          commitMessage = `${commitMessage} [${jiraTicket.key}]`;
+          jiraUrl = jiraTicket.url;
         }
       }
 
