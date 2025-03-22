@@ -11,6 +11,21 @@ A command-line interface (CLI) tool for streamlining development workflows.
 
 ## Installation
 
+### Use npm/pnpm/yarn
+
+```bash
+# Install through npm
+npm install -g orz-cli
+
+# Install through pnpm
+pnpm install -g orz-cli
+
+# Install through yarn
+yarn global add orz-cli
+```
+
+### Use git repository directly
+
 ```bash
 # Clone the repository
 git clone [repository-url]
@@ -149,3 +164,7 @@ pnpm run type-check
 ## License
 
 MIT License. See the [LICENSE](./LICENSE) file for details.
+
+```
+
+```

@@ -2,7 +2,23 @@
   "name": "orz-cli",
   "private": false,
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "keywords": [
+    "cli",
+    "github",
+    "jira",
+    "orz",
+    "orz-cli"
+  ],
+  "author": "Guangda Zhang",
+  "homepage": "https://github.com/inkless/orz-cli",
+  "bugs": {
+    "url": "https://github.com/inkless/orz-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inkless/orz-cli.git"
+  },
   "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js"
@@ -11,10 +27,16 @@
     "orz-cli": "./dist/index.js"
   },
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "jest",
     "prettier": "prettier --check .",
-    "lint": "eslint",
+    "lint": "eslint src/**/*.ts",
     "build": "rimraf dist && tsc",
     "build:watch": "tsc --watch",
     "type-check": "tsc --noEmit --emitDeclarationOnly false",
