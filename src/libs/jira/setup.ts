@@ -60,6 +60,22 @@ export function getJiraConfig(): JiraConfig {
 }
 
 /**
+ * Merges new fields from the default config into an existing config
+ * @param existingConfig The existing Jira configuration
+ * @returns Merged configuration with any new fields from the default config
+ */
+function mergeJiraConfig(existingConfig: Partial<JiraConfig>): JiraConfig {
+  // Create a new object with all default values, then override with existing values
+  return { ...DEFAULT_JIRA_CONFIG, ...existingConfig } as JiraConfig;
+}
+
+function isConfigComplete(config: JiraConfig): boolean {
+  return Object.keys(DEFAULT_JIRA_CONFIG).every(
+    (key) => key in config && config[key as keyof JiraConfig] !== undefined,
+  );
+}
+
+/**
  * Sets up all necessary Jira credentials in one function
  * @param force Whether to force update existing keys
  * @returns Promise resolving to true if all keys were set successfully
@@ -68,27 +84,29 @@ export async function setupJira(force: boolean): Promise<void> {
   console.log('📋 Setting up Jira...');
 
   let config = DEFAULT_JIRA_CONFIG;
-  let shouldPrompt = true;
 
   // Check if config exists
   if (existsSync(jiraConfigPath) && !force) {
-    config = JSON.parse(readFileSync(jiraConfigPath, 'utf8'));
+    const existingConfig = JSON.parse(readFileSync(jiraConfigPath, 'utf8'));
 
-    if (config.username && config.url) {
-      const updateValues = await confirm({
-        message: `Jira configuration already exists. Update it?`,
-        default: false,
-      });
-
-      if (!updateValues) {
-        console.log(`ℹ️ Using existing Jira configuration.`);
-        shouldPrompt = false;
-      }
+    if (!isConfigComplete(existingConfig)) {
+      console.log(
+        `⚠️ Existing Jira configuration is incomplete. Migrating automatically...`,
+      );
+      config = mergeJiraConfig(existingConfig);
+      saveJiraConfig(mergeJiraConfig(config));
     }
-  }
 
-  if (!shouldPrompt) {
-    return;
+    const updateValues = await confirm({
+      message: `Jira configuration already exists. Update it?`,
+      default: false,
+    });
+
+    if (!updateValues) {
+      console.log(`ℹ️ Using existing Jira configuration.`);
+      console.log(`You can always update it manually in ${jiraConfigPath}`);
+      process.exit(0);
+    }
   }
 
   // Collect credentials together
