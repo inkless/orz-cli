@@ -12,6 +12,7 @@ import {
   getCurrentBranch,
   pushBranchToRemote,
   getFirstCommitMessage,
+  getMainBranch,
 } from '../libs/git.js';
 import {
   confirmPrCreation,
@@ -32,6 +33,21 @@ const ghPullRequestCommand = new Command('gh-pull-request')
         process.exit(1);
       }
 
+      // Get current branch name
+      const currentBranch = getCurrentBranch();
+
+      // Get main branch name
+      const mainBranch = getMainBranch();
+
+      // Check if current branch is main branch
+      if (currentBranch === mainBranch) {
+        console.error(`⚠️ Error: You are working on the ${mainBranch} branch.`);
+        console.error(
+          'Please checkout a new branch before creating a pull request.',
+        );
+        process.exit(1);
+      }
+
       const jiraConfig = getJiraConfig();
 
       // Show git diff with main branch
@@ -39,9 +55,6 @@ const ghPullRequestCommand = new Command('gh-pull-request')
 
       // Prompt user to confirm
       await confirmPrCreation();
-
-      // Get current branch name
-      const currentBranch = getCurrentBranch();
 
       // Push to remote if needed
       pushBranchToRemote(currentBranch);

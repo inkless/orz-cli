@@ -17,6 +17,7 @@ interface JiraConfig {
   parentStoryChoices: { name: string; value: string }[];
   accountId: string;
   autoAssign: boolean;
+  mainBranch: string;
 }
 
 const DEFAULT_JIRA_CONFIG: JiraConfig = {
@@ -31,6 +32,7 @@ const DEFAULT_JIRA_CONFIG: JiraConfig = {
   parentStoryChoices: [],
   accountId: '',
   autoAssign: true,
+  mainBranch: 'main',
 };
 
 const dataDir = getDataDir();

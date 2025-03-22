@@ -1,12 +1,23 @@
 import { execSync } from 'node:child_process';
+import { getJiraConfig } from './jira/setup.js';
+
+/**
+ * Gets main branch name from config
+ * @returns main branch name from config or 'main' as fallback
+ */
+export const getMainBranch = (): string => {
+  const config = getJiraConfig();
+  return config.mainBranch || 'main';
+};
 
 /**
  * Shows git diff with main branch
  */
 export const showDiffWithMainBranch = () => {
-  console.log('📊 Showing diff with main branch:');
+  const mainBranch = getMainBranch();
+  console.log(`📊 Showing diff with ${mainBranch} branch:`);
   console.log('-------------------------------');
-  execSync('git diff main --stat', { stdio: 'inherit' });
+  execSync(`git diff ${mainBranch} --stat`, { stdio: 'inherit' });
   console.log('-------------------------------');
 };
 
@@ -44,8 +55,11 @@ export const pushBranchToRemote = (branchName: string): void => {
  * @returns first commit message
  */
 export const getFirstCommitMessage = (branchName: string): string => {
+  const mainBranch = getMainBranch();
   console.log('📝 Extracting commit message for PR title...');
-  return execSync(`git log main..${branchName} --format=%s --reverse | head -1`)
+  return execSync(
+    `git log ${mainBranch}..${branchName} --format=%s --reverse | head -1`,
+  )
     .toString()
     .trim();
 };
