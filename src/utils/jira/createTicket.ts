@@ -116,6 +116,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
       issueType: issueType.id,
       parentKey: selectedParentKey,
       labels: params.labels,
+      assignee: jiraConfig.autoAssign ? jiraConfig.accountId : undefined,
     });
 
     if (issue) {

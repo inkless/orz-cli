@@ -56,6 +56,19 @@ interface JiraProjectResponse {
 }
 
 /**
+ * Jira user response type
+ */
+interface JiraUser {
+  accountId: string;
+  emailAddress: string;
+  displayName: string;
+  active: boolean;
+  timeZone: string;
+  locale: string;
+  self: string;
+}
+
+/**
  * Converts plain text to Atlassian Document Format (ADF)
  * @param text Plain text to convert
  * @returns ADF document
@@ -160,7 +173,7 @@ export class JiraClient {
         },
         labels,
         components: components.map((name) => ({ name })),
-        ...(assignee ? { assignee: { name: assignee } } : {}),
+        ...(assignee ? { assignee: { id: assignee } } : {}),
         ...(parentKey ? { parent: { key: parentKey } } : {}),
       },
     };
@@ -202,6 +215,20 @@ export class JiraClient {
     return request<JiraProjectResponse>({
       baseUrl: this.config.baseUrl,
       endpoint: `/rest/api/3/project/${projectKey}`,
+      headers: {
+        Authorization: this.authHeader,
+      },
+    });
+  }
+
+  /**
+   * Gets current user information
+   * @returns Current user information or null if failed
+   */
+  async getCurrentUser(): Promise<JiraUser | null> {
+    return request<JiraUser>({
+      baseUrl: this.config.baseUrl,
+      endpoint: '/rest/api/3/myself',
       headers: {
         Authorization: this.authHeader,
       },

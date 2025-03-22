@@ -3,6 +3,7 @@ import { join } from 'path';
 import { confirm, input } from '@inquirer/prompts';
 import { setupApiKey, getApiKey } from '../secrets.js';
 import { getDataDir } from '../paths.js';
+import { JiraClient } from './client.js';
 
 /**
  * Interface for Jira config stored in JSON
@@ -14,7 +15,23 @@ interface JiraConfig {
   supportedIssueTypes: string[];
   parentEpicChoices: { name: string; value: string }[];
   parentStoryChoices: { name: string; value: string }[];
+  accountId: string;
+  autoAssign: boolean;
 }
+
+const DEFAULT_JIRA_CONFIG: JiraConfig = {
+  username: '',
+  url: '',
+  defaultProjectKey: '',
+  supportedIssueTypes: ['Story', 'Task', 'Sub-task'],
+  parentEpicChoices: [
+    { name: 'My Epic', value: 'PROJ-2' },
+    { name: 'My Epic 2', value: 'PROJ-3' },
+  ],
+  parentStoryChoices: [],
+  accountId: '',
+  autoAssign: true,
+};
 
 const dataDir = getDataDir();
 const jiraConfigPath = join(dataDir, 'jira_config.json');
@@ -48,17 +65,7 @@ export function getJiraConfig(): JiraConfig {
 export async function setupJira(force: boolean): Promise<void> {
   console.log('📋 Setting up Jira...');
 
-  let config: JiraConfig = {
-    username: '',
-    url: '',
-    defaultProjectKey: '',
-    supportedIssueTypes: ['Story', 'Task', 'Sub-task'],
-    parentEpicChoices: [
-      { name: 'My Epic', value: 'PROJ-2' },
-      { name: 'My Epic 2', value: 'PROJ-3' },
-    ],
-    parentStoryChoices: [],
-  };
+  let config = DEFAULT_JIRA_CONFIG;
   let shouldPrompt = true;
 
   // Check if config exists
@@ -78,37 +85,25 @@ export async function setupJira(force: boolean): Promise<void> {
     }
   }
 
-  if (shouldPrompt) {
-    // Collect credentials together
-    const username = await input({
-      message: 'Enter your Jira username (email):',
-      required: true,
-    });
-
-    const url = await input({
-      message: 'Enter your Jira URL (e.g., https://your-domain.atlassian.net):',
-      required: true,
-    });
-
-    const defaultProjectKey = await input({
-      message: 'Enter your Jira default project key:',
-      required: true,
-    });
-
-    if (username && url && defaultProjectKey) {
-      // Save both values at once
-      saveJiraConfig({
-        ...config,
-        username,
-        url,
-        defaultProjectKey,
-      });
-      console.log(`✅ Jira configuration stored successfully!`);
-    } else {
-      console.log(`⚠️ Jira configuration incomplete. Setup aborted.`);
-      return;
-    }
+  if (!shouldPrompt) {
+    return;
   }
+
+  // Collect credentials together
+  const username = await input({
+    message: 'Enter your Jira username (email):',
+    required: true,
+  });
+
+  const url = await input({
+    message: 'Enter your Jira URL (e.g., https://your-domain.atlassian.net):',
+    required: true,
+  });
+
+  const defaultProjectKey = await input({
+    message: 'Enter your Jira default project key:',
+    required: true,
+  });
 
   // Setup Jira API token (sensitive, stored as secret)
   await setupApiKey('jira_api_token', force, {
@@ -116,6 +111,31 @@ export async function setupJira(force: boolean): Promise<void> {
     successMessage: '✅ Jira API token stored successfully (read-only)!',
     skipMessage: '⚠️ No Jira API token provided. Skipping token setup.',
   });
+
+  if (username && url && defaultProjectKey) {
+    // Save all values at once
+    saveJiraConfig({
+      ...config,
+      username,
+      url,
+      defaultProjectKey,
+    });
+
+    // Get current user
+    const jiraClient = JiraClient.getInstance();
+    const currentUser = await jiraClient.getCurrentUser();
+    if (currentUser) {
+      saveJiraConfig({
+        ...getJiraConfig(),
+        accountId: currentUser.accountId,
+      });
+    }
+
+    console.log(`✅ Jira configuration stored successfully!`);
+  } else {
+    console.log(`⚠️ Jira configuration incomplete. Setup aborted.`);
+    return;
+  }
 }
 
 /**
