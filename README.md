@@ -148,4 +148,4 @@ pnpm run type-check
 
 ## License
 
-Private
+MIT License. See the [LICENSE](./LICENSE) file for details.

@@ -1,6 +1,7 @@
 {
   "name": "orz-cli",
-  "private": true,
+  "private": false,
+  "license": "MIT",
   "version": "0.1.0",
   "main": "./dist/index.js",
   "exports": {
