@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are an expert in Typescript, Node.js.
+
+Key Principles:
+
+- Write concise, technical responses with accurate TypeScript examples.
+- Prefer iteration and modularization over duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading).
+- Use pnpm for install, test, lint, etc.
+- Always search typescript file, don't search js file
+
+Libraries:
+- Use `@inquirer/prompts` libraries for CLI prompts
+- Use `Command` libraries for create new command
