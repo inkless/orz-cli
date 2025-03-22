@@ -11,14 +11,17 @@ import { confirm } from '@inquirer/prompts';
 import { checkGitHubCli } from '../utils/commands.js';
 import { projectRoot } from '../utils/paths.js';
 import { createJiraTicket } from '../utils/jira/createTicket.js';
+import { getJiraConfig } from '../utils/jira/setup.js';
 
 const ghPullRequestCommand = new Command('gh-pull-request')
   .description('Create a GitHub pull request with current branch changes')
   .option('-j, --jira', 'Create a Jira ticket for this PR', true)
-  .option('--jira-project <jiraProject>', 'Jira project key', 'MOBILEPLAT')
+  .option('--jira-project <jiraProject>', 'Jira project key')
   .option('--jira-type <jiraType>', 'Jira issue type')
   .action(async (options) => {
     try {
+      const jiraConfig = getJiraConfig();
+
       // Check if GitHub CLI is installed
       if (!checkGitHubCli()) {
         process.exit(1);
@@ -88,7 +91,7 @@ const ghPullRequestCommand = new Command('gh-pull-request')
         if (shouldCreateJira) {
           const jiraTicket = await createJiraTicket({
             summary: commitMessage,
-            projectKey: options.jiraProject,
+            projectKey: options.jiraProject || jiraConfig.defaultProjectKey,
             issueType: options.jiraType,
           });
 

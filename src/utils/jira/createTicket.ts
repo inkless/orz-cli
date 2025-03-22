@@ -2,11 +2,6 @@
 import { input } from '@inquirer/prompts';
 import { JiraClient, JiraIssueType } from './client.js';
 import { getJiraConfig } from './setup.js';
-import {
-  SUPPORTED_ISSUE_TYPES,
-  PARENT_EPIC_CHOICES,
-  PARENT_STORY_CHOICES,
-} from './constants.js';
 
 /**
  * Parameters for creating a Jira ticket
@@ -23,6 +18,7 @@ export interface CreateJiraTicketParams {
  * Creates a Jira ticket and returns the ticket info
  */
 export async function createJiraTicket(params: CreateJiraTicketParams) {
+  const jiraConfig = getJiraConfig();
   const {
     summary,
     description = '',
@@ -38,7 +34,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     if (!projectKey) {
       projectKey = await input({
         message: 'Enter Jira project key (press enter to skip):',
-        validate: (value) => (value ? true : 'Project key is required'),
+        required: true,
       });
     }
 
@@ -59,8 +55,8 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
       // Map issue types to choices for selection
       const issueTypeChoices = issueTypes
         .filter((type) =>
-          SUPPORTED_ISSUE_TYPES.includes(
-            type.name as (typeof SUPPORTED_ISSUE_TYPES)[number],
+          jiraConfig.supportedIssueTypes.includes(
+            type.name as (typeof jiraConfig.supportedIssueTypes)[number],
           ),
         )
         .map((type) => ({
@@ -91,18 +87,23 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     }
 
     // Use select prompt to let user choose parent key
-    let selectedParentKey: string;
+    let selectedParentKey: string | undefined;
     if (issueType.name === 'Sub-task') {
+      if (jiraConfig.parentStoryChoices.length === 0) {
+        console.error('❌ No parent stories found.');
+        process.exit(1);
+      }
+
       const { select } = await import('@inquirer/prompts');
       selectedParentKey = await select({
         message: 'Select parent story:',
-        choices: PARENT_STORY_CHOICES,
+        choices: jiraConfig.parentStoryChoices,
       });
-    } else {
+    } else if (jiraConfig.parentEpicChoices.length > 0) {
       const { select } = await import('@inquirer/prompts');
       selectedParentKey = await select({
         message: 'Select parent epic:',
-        choices: PARENT_EPIC_CHOICES,
+        choices: jiraConfig.parentEpicChoices,
       });
     }
 
@@ -118,7 +119,6 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     });
 
     if (issue) {
-      const jiraConfig = getJiraConfig();
       console.log(`✅ Jira ticket created successfully! Key: ${issue.key}`);
       const jiraUrl = `${jiraConfig.url}/browse/${issue.key}`;
       console.log(`🔗 URL: ${jiraUrl}`);

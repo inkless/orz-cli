@@ -16,7 +16,8 @@
     "lint": "eslint",
     "build": "rimraf dist && tsc",
     "build:watch": "tsc --watch",
-    "type-check": "tsc --noEmit --emitDeclarationOnly false"
+    "type-check": "tsc --noEmit --emitDeclarationOnly false",
+    "prepare": "pnpm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",

@@ -19,12 +19,54 @@ cd orz-cli
 # Install dependencies
 pnpm install
 
-# Build the project
-pnpm run build
-
 # Link the CLI globally
 pnpm link --global
 ```
+
+## Setup
+
+The CLI requires configuration for Jira integration. Run the setup command to configure required settings:
+
+```bash
+# Initialize the CLI configuration
+orz-cli setup
+```
+
+During setup, you'll be prompted to provide:
+
+- Your Jira username (email)
+- Your Jira URL (e.g., https://your-domain.atlassian.net)
+- Your default Jira project key
+- Your Jira API token (stored securely)
+
+The setup also checks if GitHub CLI (`gh`) is installed, which is required for PR creation functionality.
+
+### Configuration Files
+
+The CLI stores configuration in platform-specific locations:
+
+- macOS: `~/Library/Application Support/orz-cli/`
+- Windows: `%APPDATA%/orz-cli/`
+- Linux: `~/.local/share/orz-cli/`
+
+#### jira_config.json
+
+The `jira_config.json` file stores your Jira configuration and is created automatically during setup. It contains:
+
+```json
+{
+  "username": "your-jira-email@example.com",
+  "url": "https://your-domain.atlassian.net",
+  "defaultProjectKey": "PROJ",
+  "supportedIssueTypes": ["Story", "Task", "Sub-task"],
+  "parentEpicChoices": [{ "name": "My Epic", "value": "PROJ-2" }],
+  "parentStoryChoices": [{ "name": "My Task", "value": "PROJ-3" }]
+}
+```
+
+Your Jira API token is stored separately in a secure file and is not included in this JSON file.
+
+You can modify this file manually if needed, or run `orz-cli setup --force` to recreate it.
 
 ## Usage
 
@@ -67,7 +109,7 @@ Create a GitHub pull request with the current branch changes.
 Options:
 
 - `-j, --jira` - Create a Jira ticket for this PR (default: true)
-- `--jira-project <jiraProject>` - Jira project key (default: MOBILEPLAT)
+- `--jira-project <jiraProject>` - Jira project key (default: Your Jira Config)
 - `--jira-type <jiraType>` - Jira issue type
 
 ### `create-jira-ticket`
@@ -76,7 +118,7 @@ Create a Jira ticket with specified details.
 
 Options:
 
-- `-p, --project <project>` - Jira project key (default: MOBILEPLAT)
+- `-p, --project <project>` - Jira project key (default: Your Jira Config)
 - `-s, --summary <summary>` - Issue summary
 - `-d, --description <description>` - Issue description
 - `-t, --type <type>` - Issue type (e.g., Bug, Task, Story)

@@ -16,7 +16,7 @@ export function getDataDir(
     create?: boolean;
   } = {},
 ): string {
-  const { create = true } = options;
+  const { create = false } = options;
   const dataDir = paths.data;
 
   if (create) {

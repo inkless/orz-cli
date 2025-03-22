@@ -8,8 +8,12 @@ import { getDataDir } from '../paths.js';
  * Interface for Jira config stored in JSON
  */
 interface JiraConfig {
-  username?: string;
-  url?: string;
+  username: string;
+  url: string;
+  defaultProjectKey: string;
+  supportedIssueTypes: string[];
+  parentEpicChoices: { name: string; value: string }[];
+  parentStoryChoices: { name: string; value: string }[];
 }
 
 const dataDir = getDataDir();
@@ -29,15 +33,11 @@ function saveJiraConfig(config: JiraConfig) {
  * @returns The Jira config object, or an empty object if not found
  */
 export function getJiraConfig(): JiraConfig {
-  try {
-    if (existsSync(jiraConfigPath)) {
-      return JSON.parse(readFileSync(jiraConfigPath, 'utf8'));
-    }
-    return {};
-  } catch (error) {
-    console.error('Error reading Jira config:', error);
-    return {};
+  if (!existsSync(jiraConfigPath)) {
+    throw new Error('Jira config not found');
   }
+  const config = JSON.parse(readFileSync(jiraConfigPath, 'utf8'));
+  return config as JiraConfig;
 }
 
 /**
@@ -48,7 +48,17 @@ export function getJiraConfig(): JiraConfig {
 export async function setupJira(force: boolean): Promise<void> {
   console.log('📋 Setting up Jira...');
 
-  let config: JiraConfig = {};
+  let config: JiraConfig = {
+    username: '',
+    url: '',
+    defaultProjectKey: '',
+    supportedIssueTypes: ['Story', 'Task', 'Sub-task'],
+    parentEpicChoices: [
+      { name: 'My Epic', value: 'PROJ-2' },
+      { name: 'My Epic 2', value: 'PROJ-3' },
+    ],
+    parentStoryChoices: [],
+  };
   let shouldPrompt = true;
 
   // Check if config exists
@@ -72,15 +82,27 @@ export async function setupJira(force: boolean): Promise<void> {
     // Collect credentials together
     const username = await input({
       message: 'Enter your Jira username (email):',
+      required: true,
     });
 
     const url = await input({
       message: 'Enter your Jira URL (e.g., https://your-domain.atlassian.net):',
+      required: true,
     });
 
-    if (username && url) {
+    const defaultProjectKey = await input({
+      message: 'Enter your Jira default project key:',
+      required: true,
+    });
+
+    if (username && url && defaultProjectKey) {
       // Save both values at once
-      saveJiraConfig({ username, url });
+      saveJiraConfig({
+        ...config,
+        username,
+        url,
+        defaultProjectKey,
+      });
       console.log(`✅ Jira configuration stored successfully!`);
     } else {
       console.log(`⚠️ Jira configuration incomplete. Setup aborted.`);
