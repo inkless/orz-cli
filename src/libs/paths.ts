@@ -2,6 +2,7 @@ import envPaths from 'env-paths';
 import { mkdirSync } from 'fs';
 import { existsSync } from 'node:fs';
 import { join, dirname, parse } from 'node:path';
+import logger from './logger.js';
 
 // Get platform-specific paths
 export const paths = envPaths('orz-cli', { suffix: '' });
@@ -23,9 +24,9 @@ export function getDataDir(
     try {
       // No need to check existence - recursive:true handles both cases efficiently
       mkdirSync(dataDir, { recursive: true });
-      console.log(`✅ Created data directory at ${dataDir}`);
+      logger.log(`✅ Created data directory at ${dataDir}`);
     } catch (error) {
-      console.error(`Failed to create directory at ${dataDir}:`, error);
+      logger.error(`Failed to create directory at ${dataDir}:`, error);
       // Don't throw - caller might be able to recover or handle differently
     }
   }

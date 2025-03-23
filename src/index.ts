@@ -9,6 +9,7 @@ import helloCommand from './commands/hello.js';
 import setupCommand from './commands/setup.js';
 import ghPullRequestCommand from './commands/gh-pull-request.js';
 import createJiraTicketCommand from './commands/create-jira-ticket.js';
+import logger from './libs/logger.js';
 
 // Get package.json info
 const __filename = fileURLToPath(import.meta.url);
@@ -28,8 +29,8 @@ const program = new Command()
 
 // Add a default action for when no command is specified
 program.action(() => {
-  console.log('Welcome to orz-cli CLI!');
-  console.log('Run `orz-cli --help` to see available commands.');
+  logger.log('Welcome to orz-cli CLI!');
+  logger.log('Run `orz-cli --help` to see available commands.');
   program.help();
 });
 

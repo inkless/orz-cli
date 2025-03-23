@@ -179,8 +179,7 @@ export class JiraClient {
     };
 
     return request<JiraIssueResponse>({
-      baseUrl: this.config.baseUrl,
-      endpoint: '/rest/api/3/issue',
+      url: `${this.config.baseUrl}/rest/api/3/issue`,
       method: 'POST',
       body: requestBody,
       headers: {
@@ -196,8 +195,7 @@ export class JiraClient {
    */
   async getIssueTypes(projectKey: string): Promise<JiraIssueType[]> {
     const projectData = await request<JiraProjectResponse>({
-      baseUrl: this.config.baseUrl,
-      endpoint: `/rest/api/3/project/${projectKey}`,
+      url: `${this.config.baseUrl}/rest/api/3/project/${projectKey}`,
       headers: {
         Authorization: this.authHeader,
       },
@@ -213,8 +211,7 @@ export class JiraClient {
    */
   async getProject(projectKey: string): Promise<JiraProjectResponse | null> {
     return request<JiraProjectResponse>({
-      baseUrl: this.config.baseUrl,
-      endpoint: `/rest/api/3/project/${projectKey}`,
+      url: `${this.config.baseUrl}/rest/api/3/project/${projectKey}`,
       headers: {
         Authorization: this.authHeader,
       },
@@ -227,8 +224,7 @@ export class JiraClient {
    */
   async getCurrentUser(): Promise<JiraUser | null> {
     return request<JiraUser>({
-      baseUrl: this.config.baseUrl,
-      endpoint: '/rest/api/3/myself',
+      url: `${this.config.baseUrl}/rest/api/3/myself`,
       headers: {
         Authorization: this.authHeader,
       },

@@ -5,6 +5,7 @@ import { confirm } from '@inquirer/prompts';
 
 import { getDataDir } from '../paths.js';
 import { getApiKey } from '../secrets.js';
+import logger from '../logger.js';
 
 /**
  * Interface for Jira config stored in JSON
@@ -61,8 +62,8 @@ export function checkConfigExists(): boolean {
  */
 export function getJiraConfig(): JiraConfig {
   if (!checkConfigExists()) {
-    console.error('❌ Jira config not found.');
-    console.error('⚠️ Please run `orz-cli setup` to create a config.');
+    logger.error('❌ Jira config not found.');
+    logger.error('⚠️ Please run `orz-cli setup` to create a config.');
     process.exit(1);
   }
   const config = JSON.parse(readFileSync(jiraConfigPath, 'utf8'));
@@ -109,8 +110,8 @@ export async function confirmUpdateConfigOrExit(): Promise<void> {
   });
 
   if (!updateValues) {
-    console.log(`ℹ️ Using existing Jira configuration.`);
-    console.log(`You can always update it manually in ${jiraConfigPath}`);
+    logger.log(`ℹ️ Using existing Jira configuration.`);
+    logger.log(`You can always update it manually in ${jiraConfigPath}`);
     process.exit(0);
   }
 }
@@ -122,7 +123,7 @@ export async function confirmUpdateConfigOrExit(): Promise<void> {
 export function migrateJiraConfigIfIncomplete(): JiraConfig {
   const existingConfig = getJiraConfig();
   if (!isConfigComplete(existingConfig)) {
-    console.log(
+    logger.log(
       `⚠️ Existing Jira configuration is incomplete. Migrating automatically...`,
     );
     const config = mergeJiraConfig(existingConfig);

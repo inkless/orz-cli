@@ -20,6 +20,7 @@ import {
   createPullRequest,
 } from '../libs/github.js';
 import { confirmJiraTicketCreation } from '../libs/jira/prompts.js';
+import logger from '../libs/logger.js';
 
 const ghPullRequestCommand = new Command('gh-pull-request')
   .description('Create a GitHub pull request with current branch changes')
@@ -41,8 +42,8 @@ const ghPullRequestCommand = new Command('gh-pull-request')
 
       // Check if current branch is main branch
       if (currentBranch === mainBranch) {
-        console.error(`⚠️ Error: You are working on the ${mainBranch} branch.`);
-        console.error(
+        logger.error(`⚠️ Error: You are working on the ${mainBranch} branch.`);
+        logger.error(
           'Please checkout a new branch before creating a pull request.',
         );
         process.exit(1);
@@ -92,12 +93,12 @@ const ghPullRequestCommand = new Command('gh-pull-request')
         createPullRequest('');
       }
 
-      console.log('✅ Pull request created successfully!');
+      logger.log('✅ Pull request created successfully!');
       if (jiraUrl) {
-        console.log(`🔗 Jira URL: ${jiraUrl}`);
+        logger.log(`🔗 Jira URL: ${jiraUrl}`);
       }
     } catch (error) {
-      console.error('Error creating pull request:', error);
+      logger.error('Error creating pull request:', error);
       process.exit(1);
     }
   });

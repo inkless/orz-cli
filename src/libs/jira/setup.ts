@@ -9,6 +9,7 @@ import {
   confirmUpdateConfigOrExit,
   migrateJiraConfigIfIncomplete,
 } from './config.js';
+import logger from '../logger.js';
 
 /**
  * Sets up all necessary Jira credentials in one function
@@ -16,7 +17,7 @@ import {
  * @returns Promise resolving to true if all keys were set successfully
  */
 export async function setupJira(force: boolean): Promise<void> {
-  console.log('📋 Setting up Jira...');
+  logger.log('📋 Setting up Jira...');
 
   let config = DEFAULT_JIRA_CONFIG;
 
@@ -69,9 +70,9 @@ export async function setupJira(force: boolean): Promise<void> {
       });
     }
 
-    console.log(`✅ Jira configuration stored successfully!`);
+    logger.log(`✅ Jira configuration stored successfully!`);
   } else {
-    console.log(`⚠️ Jira configuration incomplete. Setup aborted.`);
+    logger.log(`⚠️ Jira configuration incomplete. Setup aborted.`);
     return;
   }
 }

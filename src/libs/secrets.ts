@@ -2,6 +2,7 @@ import { writeFileSync, existsSync, chmodSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { confirm, password } from '@inquirer/prompts';
 import { getDataDir } from './paths.js';
+import logger from './logger.js';
 
 /**
  * Manages storage and retrieval of secure API keys
@@ -38,7 +39,7 @@ export async function setupApiKey(
       });
 
       if (!updateKey) {
-        console.log(`ℹ️ Using existing ${keyName}.`);
+        logger.log(`ℹ️ Using existing ${keyName}.`);
         shouldSetKey = false;
       }
     }
@@ -55,21 +56,21 @@ export async function setupApiKey(
           writeFileSync(keyPath, apiKey);
           // Make the file readable and writable only by the owner (standard for credential files)
           chmodSync(keyPath, 0o600);
-          console.log(successMessage);
+          logger.log(successMessage);
           return true;
         } catch (error) {
-          console.error(`Failed to save ${keyName}:`, error);
+          logger.error(`Failed to save ${keyName}:`, error);
           return false;
         }
       } else {
-        console.log(skipMessage);
+        logger.log(skipMessage);
         return false;
       }
     }
 
     return false;
   } catch (error) {
-    console.error(`Error setting up ${keyName}:`, error);
+    logger.error(`Error setting up ${keyName}:`, error);
     return false;
   }
 }
@@ -85,13 +86,13 @@ export function getApiKey(keyName: string): string | null {
 
   try {
     if (!existsSync(keyPath)) {
-      console.error(`⚠️ ${keyName} not found. Please set it up first.`);
+      logger.error(`⚠️ ${keyName} not found. Please set it up first.`);
       return null;
     }
 
     return readFileSync(keyPath, 'utf8').trim();
   } catch (error) {
-    console.error(`Error reading ${keyName}:`, error);
+    logger.error(`Error reading ${keyName}:`, error);
     return null;
   }
 }

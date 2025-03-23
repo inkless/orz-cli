@@ -2,6 +2,7 @@
 import { input } from '@inquirer/prompts';
 import { JiraClient, JiraIssueType } from './client.js';
 import { getJiraConfig } from './config.js';
+import logger from '../logger.js';
 
 /**
  * Parameters for creating a Jira ticket
@@ -39,11 +40,11 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     }
 
     // Get available issue types
-    console.log('📊 Fetching issue types for project...');
+    logger.log('📊 Fetching issue types for project...');
     const issueTypes = await jiraClient.getIssueTypes(projectKey);
 
     if (issueTypes.length === 0) {
-      console.error(
+      logger.error(
         `❌ No issue types found for project ${projectKey}. Check project key.`,
       );
       process.exit(1);
@@ -79,7 +80,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
       );
 
       if (!foundIssueType) {
-        console.error(`❌ Issue type ${jiraType} not found.`);
+        logger.error(`❌ Issue type ${jiraType} not found.`);
         process.exit(1);
       }
 
@@ -90,7 +91,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     let selectedParentKey: string | undefined;
     if (issueType.name === 'Sub-task') {
       if (jiraConfig.parentStoryChoices.length === 0) {
-        console.error('❌ No parent stories found.');
+        logger.error('❌ No parent stories found.');
         process.exit(1);
       }
 
@@ -108,7 +109,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     }
 
     // Create Jira ticket with PR title as summary
-    console.log('🔄 Creating Jira ticket...');
+    logger.log('🔄 Creating Jira ticket...');
     const issue = await jiraClient.createIssue({
       projectKey,
       summary,
@@ -120,9 +121,9 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
     });
 
     if (issue) {
-      console.log(`✅ Jira ticket created successfully! Key: ${issue.key}`);
+      logger.log(`✅ Jira ticket created successfully! Key: ${issue.key}`);
       const jiraUrl = `${jiraConfig.url}/browse/${issue.key}`;
-      console.log(`🔗 URL: ${jiraUrl}`);
+      logger.log(`🔗 URL: ${jiraUrl}`);
 
       return {
         key: issue.key,
@@ -132,7 +133,7 @@ export async function createJiraTicket(params: CreateJiraTicketParams) {
 
     return null;
   } catch (error: unknown) {
-    console.error('Error creating Jira ticket:', error);
+    logger.error('Error creating Jira ticket:', error);
     throw error;
   }
 }

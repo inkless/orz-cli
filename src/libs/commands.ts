@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
+import logger from './logger.js';
 
 /**
  * Checks if a command exists in the system PATH
@@ -26,8 +27,8 @@ export function checkGitHubCli(): boolean {
   const isInstalled = commandExists('gh');
 
   if (!isInstalled) {
-    console.warn('⚠️ GitHub CLI (gh) is not installed or not in your PATH.');
-    console.warn(
+    logger.warn('⚠️ GitHub CLI (gh) is not installed or not in your PATH.');
+    logger.warn(
       'Please install it from https://cli.github.com/ to use GitHub-related features.',
     );
   }

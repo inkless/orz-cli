@@ -1,49 +1,41 @@
-// Mock console.log
-const originalConsoleLog = console.log;
-let consoleOutput: string[] = [];
-const mockedConsoleLog = (output: string) => consoleOutput.push(output);
+import { expect, test, vi, describe, afterEach } from 'vitest';
+import helloCommand from '../../commands/hello.js';
+import logger from '../../libs/logger.js';
 
-// Define options type for the hello command
-type HelloCommandOptions = { uppercase?: boolean };
+const mockedLog = vi.mocked(logger.log);
 
 describe('Hello Command', () => {
-  beforeEach(() => {
-    // Setup the mocks
-    console.log = mockedConsoleLog as typeof console.log;
-    consoleOutput = [];
-  });
-
   afterEach(() => {
-    // Restore the original console.log
-    console.log = originalConsoleLog;
+    vi.clearAllMocks();
   });
 
-  // Simplified implementation of the hello command's action
-  const runCommand = (name: string, options: HelloCommandOptions = {}) => {
-    // Call the same function defined in the hello.ts file
-    const message = `Hello, ${name}!`;
-    if (options.uppercase) {
-      console.log(message.toUpperCase());
-    } else {
-      console.log(message);
-    }
-  };
+  test('should say hello to the default name "World"', async () => {
+    // Simulate command execution
+    await helloCommand.parseAsync([], { from: 'user' });
 
-  it('should say hello to the default name "World"', () => {
-    runCommand('World');
-    expect(consoleOutput).toHaveLength(1);
-    expect(consoleOutput[0]).toBe('Hello, World!');
+    expect(mockedLog).toHaveBeenCalledWith('Hello, World!');
   });
 
-  it('should say hello to a custom name', () => {
-    runCommand('Alice');
-    expect(consoleOutput).toHaveLength(1);
-    expect(consoleOutput[0]).toBe('Hello, Alice!');
+  test('should say hello to a custom name', async () => {
+    // Simulate command execution with a custom name
+    await helloCommand.parseAsync(['Alice'], { from: 'user' });
+
+    expect(mockedLog).toHaveBeenCalledWith('Hello, Alice!');
   });
 
-  it('should say hello in uppercase when the uppercase option is provided', () => {
-    runCommand('Bob', { uppercase: true });
-    expect(consoleOutput).toHaveLength(1);
-    expect(consoleOutput[0]).toBe('HELLO, BOB!');
+  test('should say hello in uppercase when the uppercase option is provided', async () => {
+    // Simulate command execution with the uppercase option
+    await helloCommand.parseAsync(['Bob', '--uppercase'], {
+      from: 'user',
+    });
+
+    expect(mockedLog).toHaveBeenCalledWith('HELLO, BOB!');
+  });
+
+  test('should say hello in uppercase with the shorthand option', async () => {
+    // Simulate command execution with the shorthand uppercase option
+    await helloCommand.parseAsync(['Charlie', '-u'], { from: 'user' });
+
+    expect(mockedLog).toHaveBeenCalledWith('HELLO, CHARLIE!');
   });
 });

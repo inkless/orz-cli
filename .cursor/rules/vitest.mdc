@@ -1,0 +1,38 @@
+---
+description: 
+globs: **/__tests__/*.ts
+alwaysApply: false
+---
+Libraries:
+
+We are using vitest for unit/integration tests.
+
+To test a program written using Commander.js, follow the example in [hello.test.ts](mdc:src/commands/__tests__/hello.test.ts).
+
+When `@inquirer/prompts` is used, need to use `@inquirer/testing` to test, example tests:
+
+```js
+import { describe, it, expect } from 'vitest';
+import { render } from '@inquirer/testing';
+import input from './src/index.mjs';
+
+describe('input prompt', () => {
+  it('handle simple use case', async () => {
+    const { answer, events, getScreen } = await render(input, {
+      message: 'What is your name',
+    });
+
+    expect(getScreen()).toMatchInlineSnapshot(`"? What is your name"`);
+
+    events.type('J');
+    expect(getScreen()).toMatchInlineSnapshot(`"? What is your name J"`);
+
+    events.type('ohn');
+    events.keypress('enter');
+    // or events.keypress({ name: 'enter' })
+
+    await expect(answer).resolves.toEqual('John');
+    expect(getScreen()).toMatchInlineSnapshot(`"? What is your name John"`);
+  });
+});
+```

@@ -1,3 +1,5 @@
+import logger from './logger.js';
+
 /**
  * Base request configuration
  */
@@ -11,8 +13,7 @@ export interface RequestConfig {
  */
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  baseUrl: string;
-  endpoint: string;
+  url: string;
   body?: object;
   headers?: Record<string, string>;
 }
@@ -23,8 +24,7 @@ export interface RequestOptions {
  * @returns Response data or null if request failed
  */
 export async function request<T>(options: RequestOptions): Promise<T | null> {
-  const { method = 'GET', baseUrl, endpoint, body, headers = {} } = options;
-  const url = `${baseUrl}${endpoint}`;
+  const { method = 'GET', url, body, headers = {} } = options;
 
   try {
     const response = await fetch(url, {
@@ -39,13 +39,13 @@ export async function request<T>(options: RequestOptions): Promise<T | null> {
 
     if (!response.ok) {
       const errorData = (await response.json()) as Record<string, unknown>;
-      console.error(`❌ Failed request to ${endpoint}:`, errorData);
+      logger.error(`❌ Failed request to ${url}:`, errorData);
       return null;
     }
 
     return (await response.json()) as T;
   } catch (error) {
-    console.error(`❌ Error making request to ${endpoint}:`, error);
+    logger.error(`❌ Error making request to ${url}:`, error);
     return null;
   }
 }

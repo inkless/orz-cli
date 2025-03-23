@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { confirm } from '@inquirer/prompts';
 import { projectRoot } from './paths.js';
+import logger from './logger.js';
 
 /**
  * Prompts user to confirm PR creation
@@ -15,7 +16,7 @@ export const confirmPrCreation = async (): Promise<boolean> => {
   });
 
   if (!shouldContinue) {
-    console.log('❌ PR creation cancelled');
+    logger.log('❌ PR creation cancelled');
     process.exit(0);
   }
 
@@ -51,6 +52,6 @@ export const createPullRequest = (title: string): void => {
     prCommand += ' --template "pull_request_template.md"';
   }
 
-  console.log('🔗 Creating GitHub pull request...');
+  logger.log('🔗 Creating GitHub pull request...');
   execSync(prCommand, { stdio: 'inherit' });
 };

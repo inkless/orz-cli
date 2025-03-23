@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import logger from '../libs/logger.js';
 
 const helloCommand = new Command('hello')
   .description('Say hello to someone')
@@ -11,7 +12,7 @@ const helloCommand = new Command('hello')
       message = message.toUpperCase();
     }
 
-    console.log(message);
+    logger.log(message);
   });
 
 export default helloCommand;

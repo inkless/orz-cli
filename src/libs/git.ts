@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { getJiraConfig } from './jira/config.js';
+import logger from './logger.js';
 
 /**
  * Gets main branch name from config
@@ -15,10 +16,10 @@ export const getMainBranch = (): string => {
  */
 export const showDiffWithMainBranch = () => {
   const mainBranch = getMainBranch();
-  console.log(`📊 Showing diff with ${mainBranch} branch:`);
-  console.log('-------------------------------');
+  logger.log(`📊 Showing diff with ${mainBranch} branch:`);
+  logger.log('-------------------------------');
   execSync(`git diff ${mainBranch} --stat`, { stdio: 'inherit' });
-  console.log('-------------------------------');
+  logger.log('-------------------------------');
 };
 
 /**
@@ -39,11 +40,11 @@ export const pushBranchToRemote = (branchName: string): void => {
     .trim();
 
   if (!remoteRef) {
-    console.log(`🚀 Pushing branch ${branchName} to remote...`);
+    logger.log(`🚀 Pushing branch ${branchName} to remote...`);
     try {
       execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
     } catch (error) {
-      console.error('Error pushing to remote:', error);
+      logger.error('Error pushing to remote:', error);
       process.exit(1);
     }
   }
@@ -56,7 +57,7 @@ export const pushBranchToRemote = (branchName: string): void => {
  */
 export const getFirstCommitMessage = (branchName: string): string => {
   const mainBranch = getMainBranch();
-  console.log('📝 Extracting commit message for PR title...');
+  logger.log('📝 Extracting commit message for PR title...');
   return execSync(
     `git log ${mainBranch}..${branchName} --format=%s --reverse | head -1`,
   )
